@@ -6,8 +6,8 @@ const route = express.Router();
 
 
 route.post("/add",auth,authorizeAdmin,addQuestions);
-route.get("/",getQuestions);
-route.post("/:id",getResult);
+route.get("/:id",getQuestions);
+ route.post("/:id",auth,getResult);
 
 
 module.exports = route

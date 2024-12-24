@@ -1,4 +1,6 @@
+const { default: mongoose } = require("mongoose");
 const questionModel = require("../models/question.model");
+const resultModel = require("../models/result.model");
 
 
 
@@ -24,32 +26,38 @@ const addQuestions =  async (req, res) => {
 
 const getQuestions = async (req, res) => {
     try {
-        const questions = await questionModel.find();
-        res.status(200).json(questions);
+        if(!req.params.id){
+            res.status(400).json({ message: 'User id is required' }); 
+        }
+        console.log(req.params.id,"id");
+         const questions = await questionModel.findOne({createdBy: req.params.id}); 
+        res.status(200).json(questions);    
     } catch (err) {
-        res.status(400).json({ message: 'Error fetching questions', error: err });
+        res.status(400).json({ message: 'Not Valid Id', error: err });
     }
 }
 
 const getResult = async (req, res) => {
-    const { answers } = req.body;
-    const exam = await Exam.findById(req.params.id);
+    const { questions } = req.body;
+    const exam = await questionModel.findOne({createdBy: req.params.id})
+    console.log(exam,"exam");
+    console.log(questions,"answers");
 
     if (!exam) return res.status(404).json({ message: 'Exam not found' });
 
     let score = 0;
     exam.questions.forEach((question, index) => {
-        if (question.correctAnswer === answers[index]) {
+        if (question.correctAnswer == questions[index].selectedAnswer) {
             score++;
         }
     });
 
     const passed = score >= exam.questions.length / 2;
 
-    const result = new Result({
+    const result = new resultModel({
         user: req.user._id,
         exam: exam._id,
-        answers,
+        questions,
         score,
         passed,
     });
@@ -57,8 +65,11 @@ const getResult = async (req, res) => {
     try {
         await result.save();
         res.json({
+            user: req.user._id,
+            exam: exam._id,
             message: 'Exam completed',
             score,
+            out:exam.questions.length,
             passed,
         });
     } catch (err) {
