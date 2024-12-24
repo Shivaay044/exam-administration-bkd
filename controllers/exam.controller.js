@@ -17,7 +17,7 @@ const addQuestions =  async (req, res) => {
 
     try {
         await exam.save();
-        res.status(201).json({ message: 'Exam created successfully' });
+        res.status(201).json({ message: 'Exam created successfully', examid:req.user._id });
     } catch (err) {
         res.status(400).json({ message: 'Error creating exam', error: err });
     }
