@@ -6,7 +6,7 @@ const userModel = require("../models/user.model");
 
 
 const register =async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password,role } = req.body;
     try {
       const emailcheck = await userModel.findOne({ email });
       if (emailcheck) {
@@ -16,6 +16,7 @@ const register =async (req, res) => {
           const user = new userModel({
             name,
             email,
+            role,
             password: hash,
           });
           await user.save();
